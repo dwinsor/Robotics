@@ -1,40 +1,47 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.GyroSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 /**
- * This is NOT an opmode.
+ *  @author Jochen Fischer
+ *  @version 1.0
  *
- * This class can be used to define all the specific hardware for a single robot.
- * In this case that robot is a Pushbot.
- * See PushbotTeleopTank_Iterative and others classes starting with "Pushbot" for usage examples.
+ *  Hardware definition for the Elon Drivebot.
  *
- * This hardware class assumes the following device names have been configured on the robot:
- * Note:  All names are lower case and some have single spaces between words.
+ *  The robot has a simple drive base with 2 motors:
+ *      motorLeft
+ *      motorRight
  *
- * Motor channel:  Left  drive motor:        "left_drive"
- * Motor channel:  Right drive motor:        "right_drive"
- * Motor channel:  Manipulator drive motor:  "left_arm"
- * Servo channel:  Servo to open left claw:  "left_hand"
- * Servo channel:  Servo to open right claw: "right_hand"
  */
-public class HardwareTestBed
+public class HardwareDriveBot
 {
     /* Public OpMode members. */
     public DcMotor  motorLeft   = null;
     public DcMotor  motorRight  = null;
+    public TouchSensor sensorTouch = null;
+    public ColorSensor sensorColor = null;
+    public GyroSensor sensorGyro = null;
 
-    public static final double POWER       =  1.0;
+    // useful constants:
+    public static final double SLOW_POWER = 0.2;
+    public static final double POWER = 1.0;
+    public static final double STOP = 0.0;
+    public static final int ENC_ROTATION = 1120;
+    public static final double WHEEL_DIAMETER = 4.0;
 
     /* local OpMode members. */
     HardwareMap hwMap           =  null;
     private ElapsedTime period  = new ElapsedTime();
 
     /* Constructor */
-    public HardwareTestBed(){
+    public HardwareDriveBot(){
 
     }
 
@@ -46,18 +53,35 @@ public class HardwareTestBed
         // Define and Initialize Motors
         motorLeft   = hwMap.dcMotor.get("motorLeft");
         motorRight  = hwMap.dcMotor.get("motorRight");
-
-        motorRight.setDirection(DcMotor.Direction.FORWARD); // Set to REVERSE if using AndyMark motors
-        motorLeft.setDirection(DcMotor.Direction.REVERSE);// Set to FORWARD if using AndyMark motors
+        motorLeft.setDirection(DcMotor.Direction.FORWARD);
+        motorRight.setDirection(DcMotor.Direction.REVERSE);
 
         // Set all motors to zero power
         motorLeft.setPower(0);
         motorRight.setPower(0);
 
-        // Set all motors to run without encoders.
-        // May want to use RUN_USING_ENCODERS if encoders are installed.
-        motorLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        motorRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        // reset encoders
+        motorLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        // Set all motors to run with encoders.
+        motorLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        motorRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        /**
+         * Setup the sensors
+         */
+        sensorTouch = hwMap.touchSensor.get("sensorTouch");
+        sensorColor = hwMap.colorSensor.get("sensorColor");
+        sensorGyro = hwMap.gyroSensor.get("sensorGyro");
+
+        sensorColor.enableLed(true);
+    }
+
+    // Stop both motors
+    void stop() {
+        motorLeft.setPower(HardwareDriveBot.STOP);
+        motorRight.setPower(HardwareDriveBot.STOP);
 
     }
 
@@ -82,4 +106,3 @@ public class HardwareTestBed
         period.reset();
     }
 }
-
